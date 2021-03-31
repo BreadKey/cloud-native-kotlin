@@ -8,9 +8,12 @@ import org.springframework.stereotype.Component
 @Component
 class EmployeeModelAssembler : RepresentationModelAssembler<Employee, EntityModel<Employee>> {
     override fun toModel(employee: Employee): EntityModel<Employee> =
-        EntityModel.of(employee, linkTo<EmployeeController> {
-            one(employee.id)
-        }.withSelfRel(), linkTo<EmployeeController> {
-            all()
-        }.withRel("employees"))
+        EntityModel.of(employee,
+            linkTo<EmployeeController> {
+                one(employee.id)
+            }.withSelfRel(),
+            linkTo<EmployeeController> {
+                all()
+            }.withRel("employees")
+        )
 }

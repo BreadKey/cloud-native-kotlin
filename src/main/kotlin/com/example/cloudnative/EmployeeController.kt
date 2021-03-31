@@ -2,7 +2,9 @@ package com.example.cloudnative
 
 import org.springframework.hateoas.CollectionModel
 import org.springframework.hateoas.EntityModel
+import org.springframework.hateoas.IanaLinkRelations
 import org.springframework.hateoas.server.mvc.linkTo
+import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
 
 @RestController
@@ -11,11 +13,19 @@ class EmployeeController(private val repository: EmployeeRepository, private val
     fun all(): CollectionModel<EntityModel<Employee>> {
         val employees = repository.findAll().map { employee -> assembler.toModel(employee) }
 
-        return CollectionModel.of(employees, linkTo<EmployeeController> { all() }.withSelfRel())
+        return CollectionModel.of(employees,
+            linkTo<EmployeeController> { all() }.withSelfRel()
+        )
     }
 
     @PostMapping("/employees")
-    fun newEmployee(@RequestBody newEmployee: Employee) = repository.save(newEmployee)
+    fun newEmployee(@RequestBody newEmployee: Employee): ResponseEntity<*> {
+        val entityModel = assembler.toModel(repository.save(newEmployee))
+
+        return ResponseEntity
+            .created(entityModel.getRequiredLink(IanaLinkRelations.SELF).toUri())
+            .body(entityModel)
+    }
 
     @GetMapping("/employees/{id}")
     fun one(@PathVariable id: Long): EntityModel<Employee> {

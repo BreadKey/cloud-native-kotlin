@@ -11,7 +11,7 @@ class LoadDatabase {
 
     @Bean
     fun initDatabase(repository: EmployeeRepository) = CommandLineRunner { _ ->
-        log.info("Preloading " + repository.save(Employee("Bilbo Baggins", "burglar")))
-        log.info("Preloading " + repository.save(Employee("Frodo Baggins", "thief")))
+        log.info("Preloading " + repository.save(Employee("Bilbo", "Baggins", "burglar")))
+        log.info("Preloading " + repository.save(Employee("Frodo", "Baggins", "thief")))
     }
 }
