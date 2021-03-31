@@ -13,13 +13,15 @@ class EmployeeController(private val repository: EmployeeRepository, private val
     fun all(): CollectionModel<EntityModel<Employee>> {
         val employees = repository.findAll().map { employee -> assembler.toModel(employee) }
 
-        return CollectionModel.of(employees,
+        return CollectionModel.of(
+            employees,
             linkTo<EmployeeController> { all() }.withSelfRel()
         )
     }
 
     @PostMapping("/employees")
-    fun newEmployee(@RequestBody newEmployee: Employee): ResponseEntity<*> {
+    fun newEmployee(@RequestBody newEmployee: Employee): ResponseEntity<Any> {
+        newEmployee.id = 0
         val entityModel = assembler.toModel(repository.save(newEmployee))
 
         return ResponseEntity
@@ -35,8 +37,8 @@ class EmployeeController(private val repository: EmployeeRepository, private val
     }
 
     @PutMapping("/employees/{id}")
-    fun replaceEmployee(@RequestBody newEmployee: Employee, @PathVariable id: Long): Employee =
-        repository.findById(id).map { employee ->
+    fun replaceEmployee(@RequestBody newEmployee: Employee, @PathVariable id: Long): ResponseEntity<Any> {
+        val updatedEmployee = repository.findById(id).map { employee ->
             employee.name = newEmployee.name
             employee.role = newEmployee.role
             repository.save(employee)
@@ -45,6 +47,16 @@ class EmployeeController(private val repository: EmployeeRepository, private val
             repository.save(newEmployee)
         }
 
+        val entityModel = assembler.toModel(updatedEmployee)
+
+        return ResponseEntity
+            .created(entityModel.getRequiredLink(IanaLinkRelations.SELF).toUri())
+            .body(entityModel)
+    }
+
     @DeleteMapping("/employees/{id}")
-    fun deleteEmployee(@PathVariable id: Long) = repository.deleteById(id)
+    fun deleteEmployee(@PathVariable id: Long): ResponseEntity<Any> {
+        repository.deleteById(id)
+        return ResponseEntity.noContent().build()
+    }
 }
