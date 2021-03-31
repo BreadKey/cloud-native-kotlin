@@ -1,11 +1,14 @@
 package com.example.cloudnative
 
-import javax.persistence.Id
 import javax.persistence.Entity
 import javax.persistence.GeneratedValue
+import javax.persistence.Id
 
 @Entity
-data class Customer(
+data class Employee(
+    var name: String,
+    var role: String,
     @Id
     @GeneratedValue
-    val id: Long = 0, val email: String)
+    var id: Long = 0
+)
