@@ -20,7 +20,7 @@ class EmployeeController(private val repository: EmployeeRepository, private val
     }
 
     @PostMapping("/employees")
-    fun newEmployee(@RequestBody newEmployee: Employee): ResponseEntity<Any> {
+    fun newEmployee(@RequestBody newEmployee: Employee): ResponseEntity<EntityModel<Employee>> {
         newEmployee.id = 0
         val entityModel = assembler.toModel(repository.save(newEmployee))
 
