@@ -1,4 +1,4 @@
-package com.example.cloudnative
+package studio.breadkey.rankingservice
 
 import org.springframework.boot.autoconfigure.SpringBootApplication
 import org.springframework.boot.runApplication
@@ -9,22 +9,8 @@ import javax.persistence.GeneratedValue
 import javax.persistence.Id
 
 @SpringBootApplication
-class KotlinApplication
+class RankingServiceApplication
 
 fun main(args: Array<String>) {
-    runApplication<KotlinApplication>(*args)
+    runApplication<RankingServiceApplication>(*args)
 }
-
-@Entity
-data class Cat(
-        val name: String,
-        @Id
-        @GeneratedValue
-        private var id: Long = 0
-) {
-    fun getId() = id
-    override fun toString(): String = "Cat{id=$id, name='$name'}"
-}
-
-@RepositoryRestResource
-interface CatRepository: JpaRepository<Cat, Long>
