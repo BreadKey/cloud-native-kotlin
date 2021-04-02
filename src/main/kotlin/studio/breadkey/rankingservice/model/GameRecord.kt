@@ -9,8 +9,7 @@ data class GameRecord(
     val game: String,
     val score: Int,
     val userId: String,
-    val userNickname: String,
     @Id
     @GeneratedValue
-    var id: Long = 0
+    var id: Long? = null
 )

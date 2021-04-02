@@ -1,38 +1,43 @@
 package studio.breadkey.rankingservice
 
+import com.fasterxml.jackson.databind.ObjectMapper
 import org.junit.jupiter.api.Assertions.assertEquals
-import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc
 import org.springframework.boot.test.context.SpringBootTest
+import org.springframework.http.MediaType
+import org.springframework.security.test.context.support.WithMockUser
+import org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf
+import org.springframework.test.web.servlet.MockMvc
+import org.springframework.test.web.servlet.request.MockMvcRequestBuilders
+import org.springframework.test.web.servlet.result.MockMvcResultMatchers.status
 import studio.breadkey.rankingservice.model.GameRecord
-import studio.breadkey.rankingservice.service.RankingService
+import studio.breadkey.rankingservice.model.Ranking
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.MOCK)
 @AutoConfigureMockMvc
-class RankingServiceApplicationTests {
+@WithMockUser(username = "breadkey", roles = ["USER"])
+class RankingServiceApplicationTest {
     @Autowired
-    private lateinit var rankingService: RankingService
+    private lateinit var mvc: MockMvc
 
-    @BeforeEach
-    fun before() {
-        listOf(
-            GameRecord(
-                "tetris", 1000, "breadkey", "LYK"
-            ),
-            GameRecord(
-                "tetris", 300, "kihoon94", "KKH"
-            )
-        ).forEach { record ->
-            rankingService.add(record)
-        }
-    }
+    @Autowired
+    private lateinit var objectMapper: ObjectMapper
 
     @Test
-    fun findTop10() {
-        val top10 = rankingService.findTop10("tetris")
-        assertEquals("breadkey", top10.first().userId)
-        assertEquals("kihoon94", top10.last().userId)
+    fun addNewRecord() {
+        val json = objectMapper.writeValueAsString(GameRecord("tetris", 10000, "breadkey"))
+
+        mvc.perform(
+            MockMvcRequestBuilders.post("/ranking/tetris").with(csrf())
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(json)
+        ).andExpect(status().isCreated)
+            .andExpect { mvcResult ->
+                val ranking = objectMapper.readValue(mvcResult.response.contentAsString, Ranking::class.java)
+
+                assertEquals(1, ranking.number)
+            }
     }
 }
